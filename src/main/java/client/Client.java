@@ -34,7 +34,6 @@ public class Client extends JFrame {
             } else if("download".equals(cmd[0])) {
                 getFile(cmd[1]);
             }
-            
         });
 
         addWindowListener(new WindowAdapter() {
@@ -55,6 +54,30 @@ public class Client extends JFrame {
 
     private void getFile(String filename) {
         //TODO 2 downloading
+            try{
+            File file = new File("client/" + filename);
+            if(!file.exists()){
+                file.createNewFile();
+                FileOutputStream fos = new FileOutputStream(file);
+                out.writeUTF("download");
+                out.writeUTF(filename);
+                System.out.println(in.readUTF());
+                long size = in.readLong();
+                byte[] buffer = new byte[8*1024];
+                for (int i = 0; i < ((size + (8 * 1024 - 1))/ buffer.length); i++) {
+                    int read = in.read(buffer);
+                    fos.write(buffer, 0, read);
+                }
+                fos.flush();
+                fos.close();
+                System.out.println("Ok");
+            } else {
+                System.out.println("File " + filename + " already exists. Downloading canceled.");
+                }
+            }catch (Exception e) {
+            System.out.println("WRONG");
+            e.printStackTrace();
+            }
     }
 
     private void sendFile(String filename) {
@@ -89,9 +112,6 @@ public class Client extends JFrame {
         try {
             out.writeUTF(message);
             String command = in.readUTF();
-            /*if("done".equalsIgnoreCase(command)) {
-
-            }*/
             System.out.println(command);
         }
         catch (EOFException eofException) {
